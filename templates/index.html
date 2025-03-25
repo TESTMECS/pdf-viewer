@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Book Viewer</title>
+  <link rel="icon" type="image/x-icon" href="../data/favicon.png" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/ekmas/cs16.css@main/css/cs16.min.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>PDF Book Viewer</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('manage_tags') }}" class="manage-tags-btn">Manage Tags</a>
+      </div>
+    </div>
+
+    <!-- Tag filters navigation -->
+    <div class="tag-filters">
+      <a href="{{ url_for('filter_by_tag', tag='all') }}"
+        class="filter-button all {% if active_filter is not defined or active_filter == 'all' %}active{% endif %}">
+        All Books
+      </a>
+      {% for tag in available_tags %}
+      <a href="{{ url_for('filter_by_tag', tag=tag) }}"
+        class="filter-button {% if active_filter is defined and active_filter == tag %}active{% endif %}">
+        {{ tag|replace('_', ' ')|title }}
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if books %} {% for folder, files in books.items() %}
+    <div class="folder-container">
+      <h2>
+        {% if folder == "root" %}Main Folder{% else %}{{ folder }}{% endif %}
+        <span class="file-count">{{ files|length }} {% if files|length == 1 %}file{% else %}files{%
+          endif %}</span>
+      </h2>
+      {% if files %}
+      <ul>
+        {% for file in files %}
+        <li>
+          <a class="pdf-link" href="/books/{% if folder != 'root' %}{{ folder }}/{% endif %}{{ file }}" target="_blank"
+            data-folder="{% if folder != 'root' %}{{ folder }}{% else %}root{% endif %}" data-filename="{{ file }}">
+            {{ file }}
+          </a>
+
+          <!-- Book tags -->
+          {% set book_path = (folder + '/' + file) if folder != 'root' else
+          file %}
+          <div class="tags-container" data-book-path="{{ book_path }}">
+            {% if book_tags and book_path in book_tags %} {% for tag in
+            book_tags[book_path] %}
+            <span class="tag tag-{{ tag }}" data-tag="{{ tag }}" onclick="removeTag('{{ book_path }}', '{{ tag }}')">
+              <span class="tag-indicator tag-indicator-{{ tag }}"></span>
+              {{ tag|replace('_', ' ')|title }}
+            </span>
+            {% endfor %} {% endif %}
+
+            <!-- Tag dropdown -->
+            <div class="tag-dropdown">
+              <button class="tag-dropdown-button" onclick="toggleTagDropdown(this)">
+                + Add Tag
+              </button>
+              <div class="tag-dropdown-content">
+                {% for tag in available_tags %}
+                <div class="tag-dropdown-item" onclick="addTag('{{ book_path }}', '{{ tag }}')">
+                  <span class="tag-indicator tag-indicator-{{ tag }}"></span>
+                  {{ tag|replace('_', ' ')|title }}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty-folder">No PDF files in this folder</p>
+      {% endif %}
+    </div>
+    {% endfor %} {% else %}
+    <div class="folder-container">
+      <p class="empty-folder">
+        No books found. Add some PDF files to the books directory to get
+        started.
+      </p>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Helper functions for tag management
+    function toggleTagDropdown(button) {
+      const dropdown = button.parentNode;
+      dropdown.classList.toggle("show");
+
+      // Close all other dropdowns
+      const allDropdowns = document.querySelectorAll(".tag-dropdown.show");
+      allDropdowns.forEach((d) => {
+        if (d !== dropdown) {
+          d.classList.remove("show");
+        }
+      });
+
+      // Close when clicking outside
+      window.addEventListener("click", function (e) {
+        if (
+          !e.target.matches(".tag-dropdown-button") &&
+          !e.target.closest(".tag-dropdown-content")
+        ) {
+          const openDropdowns =
+            document.querySelectorAll(".tag-dropdown.show");
+          openDropdowns.forEach((dropdown) =>
+            dropdown.classList.remove("show")
+          );
+        }
+      });
+    }
+
+    function addTag(bookPath, tag) {
+      fetch("/api/tags", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          book_path: bookPath,
+          tag: tag,
+          action: "add",
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Add tag visually
+            const tagsContainer = document.querySelector(
+              `.tags-container[data-book-path="${bookPath}"]`
+            );
+
+            // Check if tag already exists
+            const existingTag = tagsContainer.querySelector(
+              `.tag[data-tag="${tag}"]`
+            );
+            if (!existingTag) {
+              const tagElement = document.createElement("span");
+              tagElement.className = `tag tag-${tag}`;
+              tagElement.setAttribute("data-tag", tag);
+              tagElement.setAttribute(
+                "onclick",
+                `removeTag('${bookPath}', '${tag}')`
+              );
+
+              const indicator = document.createElement("span");
+              indicator.className = `tag-indicator tag-indicator-${tag}`;
+              tagElement.appendChild(indicator);
+
+              const tagText = document.createTextNode(
+                tag.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())
+              );
+              tagElement.appendChild(tagText);
+
+              // Insert before dropdown
+              const dropdown = tagsContainer.querySelector(".tag-dropdown");
+              tagsContainer.insertBefore(tagElement, dropdown);
+            }
+
+            // Close dropdown
+            const dropdown = tagsContainer.querySelector(".tag-dropdown");
+            dropdown.classList.remove("show");
+          }
+        })
+        .catch((error) => {
+          console.error("Error updating tag:", error);
+        });
+    }
+
+    function removeTag(bookPath, tag) {
+      fetch("/api/tags", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          book_path: bookPath,
+          tag: tag,
+          action: "remove",
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Remove tag visually
+            const tagsContainer = document.querySelector(
+              `.tags-container[data-book-path="${bookPath}"]`
+            );
+            const tagElement = tagsContainer.querySelector(
+              `.tag[data-tag="${tag}"]`
+            );
+            if (tagElement) {
+              tagElement.remove();
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Error removing tag:", error);
+        });
+    }
+  </script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

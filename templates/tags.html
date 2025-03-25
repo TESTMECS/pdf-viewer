@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tag Management - PDF Book Viewer</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/gh/ekmas/cs16.css@main/css/cs16.min.css"
+    />
+    <style>
+      .tag-management {
+        margin-top: 20px;
+      }
+
+      .tag-form {
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: #f5f7f9;
+        border-radius: 8px;
+      }
+
+      .tag-list {
+        list-style: none;
+        color: #666;
+        padding: 0;
+      }
+
+      .tag-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 10px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .tag-name {
+        font-weight: 600;
+        margin-right: 10px;
+      }
+
+      .tag-description {
+        color: #666;
+        flex-grow: 1;
+      }
+
+      .tag-count {
+        background-color: #eee;
+        border-radius: 12px;
+        padding: 3px 8px;
+        font-size: 0.75rem;
+        margin-right: 15px;
+      }
+
+      .tag-actions {
+        display: flex;
+        gap: 5px;
+      }
+
+      .tag-action {
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.2s;
+      }
+
+      .tag-action.edit {
+        background-color: #3498db;
+        color: #666;
+      }
+
+      .tag-action.delete {
+        background-color: #e74c3c;
+        color: #666;
+      }
+
+      .tag-action:hover {
+        filter: brightness(1.1);
+      }
+
+      .tag-form input,
+      .tag-form textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .tag-form button {
+        padding: 10px 15px;
+        background-color: #3498db;
+        color: #666;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .tag-form button:hover {
+        background-color: #2980b9;
+      }
+
+      .navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .back-link {
+        color: #3498db;
+        text-decoration: none;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Tag Management</h1>
+      </div>
+
+      <div class="navigation">
+        <a href="{{ url_for('index') }}" class="back-link"
+          >&larr; Back to Book Viewer</a
+        >
+      </div>
+
+      <div class="tag-management">
+        <!-- Create/Edit Tag Form -->
+        <div class="tag-form">
+          <h2 id="form-title">Create New Tag</h2>
+          <form id="tag-form">
+            <input type="hidden" id="tag-id" value="" />
+            <div>
+              <label for="tag-name">Tag Name:</label>
+              <input
+                type="text"
+                id="tag-name"
+                placeholder="Enter tag name"
+                required
+              />
+            </div>
+            <div>
+              <label for="tag-description">Description:</label>
+              <textarea
+                id="tag-description"
+                placeholder="Enter tag description"
+                rows="3"
+              ></textarea>
+            </div>
+            <div>
+              <button type="submit" id="submit-button">Create Tag</button>
+              <button
+                type="button"
+                id="cancel-button"
+                style="display: none; background-color: #7f8c8d"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tag List -->
+        <h2>Available Tags</h2>
+        <p style="color: #666">
+          Manage your tags below. Default tags (finished, in progress, backlog)
+          cannot be deleted.
+        </p>
+        <ul class="tag-list" id="tag-list">
+          {% for tag in tags %}
+          <li
+            class="tag-item"
+            data-id="{{ tag.id }}"
+            data-name="{{ tag.name }}"
+            data-description="{{ tag.description }}"
+          >
+            <div
+              class="tag-indicator tag-indicator-{{ tag.name }}"
+              style="margin-right: 10px"
+            ></div>
+            <div class="tag-name">{{ tag.name|replace('_', ' ')|title }}</div>
+            <div class="tag-description">{{ tag.description or "" }}</div>
+            <div class="tag-count">{{ tag.book_count }} books</div>
+            <div class="tag-actions">
+              <button class="tag-action edit" onclick="editTag({{ tag.id }})">
+                Edit
+              </button>
+              {% if tag.name not in ['finished', 'in_progress', 'backlog'] %}
+              <button
+                class="tag-action delete"
+                onclick="deleteTag({{ tag.id }})"
+              >
+                Delete
+              </button>
+              {% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // Tag Management Functions
+      function editTag(tagId) {
+        const tagItem = document.querySelector(`.tag-item[data-id="${tagId}"]`);
+        const tagName = tagItem.getAttribute("data-name");
+        const tagDescription = tagItem.getAttribute("data-description");
+
+        // Update form
+        document.getElementById("form-title").textContent = "Edit Tag";
+        document.getElementById("tag-id").value = tagId;
+        document.getElementById("tag-name").value = tagName;
+        document.getElementById("tag-description").value = tagDescription || "";
+        document.getElementById("submit-button").textContent = "Update Tag";
+        document.getElementById("cancel-button").style.display = "inline-block";
+
+        // Scroll to form
+        document
+          .querySelector(".tag-form")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+
+      function resetForm() {
+        document.getElementById("form-title").textContent = "Create New Tag";
+        document.getElementById("tag-form").reset();
+        document.getElementById("tag-id").value = "";
+        document.getElementById("submit-button").textContent = "Create Tag";
+        document.getElementById("cancel-button").style.display = "none";
+      }
+
+      function deleteTag(tagId) {
+        if (
+          confirm(
+            "Are you sure you want to delete this tag? This action cannot be undone."
+          )
+        ) {
+          fetch(`/api/tags/delete/${tagId}`, {
+            method: "DELETE",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Remove tag from list
+                const tagItem = document.querySelector(
+                  `.tag-item[data-id="${tagId}"]`
+                );
+                tagItem.remove();
+              } else {
+                alert(`Error: ${data.error}`);
+              }
+            })
+            .catch((error) => {
+              console.error("Error deleting tag:", error);
+              alert("An error occurred while deleting the tag.");
+            });
+        }
+      }
+
+      // Handle form submission
+      document
+        .getElementById("tag-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const tagId = document.getElementById("tag-id").value;
+          const tagName = document.getElementById("tag-name").value;
+          const tagDescription =
+            document.getElementById("tag-description").value;
+
+          const isUpdate = tagId !== "";
+          const endpoint = isUpdate
+            ? `/api/tags/update/${tagId}`
+            : "/api/tags/create";
+          const method = isUpdate ? "PUT" : "POST";
+
+          fetch(endpoint, {
+            method: method,
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: tagName,
+              description: tagDescription,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Reload page to show updated tags
+                window.location.reload();
+              } else {
+                alert(`Error: ${data.error}`);
+              }
+            })
+            .catch((error) => {
+              console.error("Error saving tag:", error);
+              alert("An error occurred while saving the tag.");
+            });
+        });
+
+      // Handle cancel button
+      document
+        .getElementById("cancel-button")
+        .addEventListener("click", resetForm);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,358 @@
+/* Additional styles for PDF Book Viewer */
+
+/* PDF file icon styles */
+.pdf-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e74c3c"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10.92,12.31C10.68,11.54 10.15,9.08 11.81,9.04C13.16,9 13.24,11.53 12.94,12.31C12.72,12.88 12.46,13.39 12.28,14H13.83C13.61,13.47 13.26,12.89 13.06,12.31C13.5,11.94 13.2,11 12.7,11C12.53,11 12.28,11.04 12.25,11.31C12.23,11.5 12.39,11.65 12.5,11.77C12.23,12.06 12.18,12.38 12.04,12.77H11.58C11.53,12.38 11.47,12.08 11.34,11.8L11.27,11.92C11.21,12.04 11.34,12.22 11.43,12.31C11.21,12.64 11.06,13.34 10.95,14H12.5C12.75,13.43 13.05,12.93 13.28,12.31H10.92Z"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+}
+
+/* Animations for adding new files */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.new-file {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Folder collapsed/expanded styles (for future use) */
+.folder-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.folder-header:hover {
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+/* Responsive grid for larger collections (for future use) */
+@media (min-width: 992px) {
+  .pdf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .pdf-grid-item {
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .pdf-grid-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Dark mode styles (for future use) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --link-color: #4fc3f7;
+    --link-hover: #ff5252;
+    --border-color: #333;
+    --card-bg: #2a2a2a;
+  }
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+.container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+}
+
+h1 {
+  color: #2c3e50;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+h2 {
+  color: #3498db;
+  margin-top: 25px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  font-weight: 600;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+li {
+  margin: 12px 0;
+  transition: transform 0.2s ease;
+}
+
+li:hover {
+  transform: translateX(5px);
+}
+
+.pdf-link {
+  display: block;
+  text-decoration: none;
+  color: #2980b9;
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: #f5f7f9;
+  border-left: 3px solid transparent;
+}
+
+.pdf-link:hover {
+  color: #e74c3c;
+  background-color: #edf2f7;
+  border-left: 3px solid #3498db;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.empty-folder {
+  color: #7f8c8d;
+  font-style: italic;
+  padding: 10px 15px;
+}
+
+.folder-container {
+  margin-bottom: 40px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.folder-container:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.file-count {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-left: 10px;
+  font-weight: normal;
+}
+
+.header {
+  margin-bottom: 30px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-actions {
+  margin-top: 10px;
+}
+
+.manage-tags-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  margin-top: -15px;
+}
+
+.manage-tags-btn:hover {
+  background-color: #2980b9;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Tag styles */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  margin-left: 15px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.tag:hover {
+  filter: brightness(1.1);
+}
+
+.tag-finished {
+  background-color: #a8e6cf;
+  color: #2d6a4f;
+}
+
+.tag-in_progress {
+  background-color: #ffd3b6;
+  color: #7f4f24;
+}
+
+.tag-backlog {
+  background-color: #dcedc8;
+  color: #4d6846;
+}
+
+.tag-indicator {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.tag-indicator-finished {
+  background-color: #2d6a4f;
+}
+
+.tag-indicator-in_progress {
+  background-color: #7f4f24;
+}
+
+.tag-indicator-backlog {
+  background-color: #4d6846;
+}
+
+/* Tag filter navigation */
+.tag-filters {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 30px;
+  padding: 10px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background-color: #f5f7f9;
+  color: #2c3e50;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filter-button:hover {
+  background-color: #edf2f7;
+}
+
+.filter-button.active {
+  background-color: #3498db;
+  color: white;
+}
+
+.filter-button.all {
+  background-color: #2c3e50;
+  color: white;
+}
+
+.filter-button.all:hover {
+  background-color: #1e2a36;
+}
+
+.filter-button.all.active {
+  background-color: #1e2a36;
+}
+
+/* Tag selection dropdown */
+.tag-dropdown {
+  position: relative;
+  display: inline-block;
+  margin-left: 15px;
+}
+
+.tag-dropdown-button {
+  background-color: #f5f7f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-dropdown-button:hover {
+  background-color: #edf2f7;
+}
+
+.tag-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 120px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  z-index: 1;
+  right: 0;
+}
+
+.tag-dropdown.show .tag-dropdown-content {
+  display: block;
+}
+
+.tag-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.tag-dropdown-item:hover {
+  background-color: #f5f7f9;
+}
