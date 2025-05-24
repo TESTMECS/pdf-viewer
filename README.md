@@ -1,6 +1,6 @@
 # PDF Book Viewer
 
-A lightweight web application for viewing and organizing your PDF books.
+A lightweight web application for viewing and organizing your books.
 
 ## Features
 
