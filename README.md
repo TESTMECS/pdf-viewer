@@ -35,10 +35,14 @@ A lightweight web application for viewing and organizing your PDF books.
 3. Run the setup script to create the necessary directories and initialize the database:
 
    ```
-   python scripts/setup.py setup
+   just start 
+   ```
+   or
+   ```
+   uv run app.py
    ```
 
-4. Add your PDF books to the `books` directory. Alternatively, you can create a symbolic link to your existing PDF collection:
+5. Add your PDF books to the `books` directory. Alternatively, you can create a symbolic link to your existing PDF collection:
 
    ```
    # Linux/Mac
