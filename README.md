@@ -1,6 +1,6 @@
 # PDF Viewer
 
-A lightweight web application for viewing and organizing your PDFs. Made to mangage all the resesearch papers and books I download.
+A lightweight web application for viewing and organizing your PDFs. Made to mangage all the resesearch papers and books I download
 
 ## Features
 
